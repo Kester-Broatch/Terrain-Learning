@@ -2,7 +2,7 @@ This repo contains the code I used in my MSc project to learn the vehicle dynami
 
 This repo is organised as follows:
 
-.
+```bash
 ├── data
 │   ├── download-data.sh
 │   ├── test
@@ -13,3 +13,4 @@ This repo is organised as follows:
 │   ├── simulation
 │   └── training
 └── tests
+```
