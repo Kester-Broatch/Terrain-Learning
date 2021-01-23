@@ -1,4 +1,5 @@
 .DS_Store
+.vscode
 
 data/test/*
 !data/test/README.md

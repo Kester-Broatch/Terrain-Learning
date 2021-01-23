@@ -5,7 +5,6 @@ This repo is organised as follows:
 
 ```
 ├── data
-│   ├── download-data.sh
 │   ├── test
 │   └── train
 ├── models
