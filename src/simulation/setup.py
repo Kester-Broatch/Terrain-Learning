@@ -7,7 +7,7 @@ import os
 import re
 import numpy as np
 from PIL import Image
-from open3d import camera, geometry, io
+import open3d as o3d
 import matplotlib.pyplot as plt
 
 project_path = os.path.dirname(os.path.realpath(__file__)).replace('/src/simulation','')
@@ -16,14 +16,17 @@ data_paths = [project_path+"/data/test", project_path+"/data/train"] # Relative 
 def RGBD2pcloud(path):
     for image_name in sorted(os.listdir(path+'/depth_gray')):  
         image_name = image_name.replace(".png","")
-        rgb_raw = io.read_image(path+'/rgb/'+image_name+'.jpg') 
-        depth_raw = io.read_image(path+'/depth_gray/'+image_name+'.png') 
-        rgbd_image = geometry.RGBDImage.create_from_color_and_depth(rgb_raw, depth_raw)
+        rgb_raw = o3d.io.read_image(path+'/rgb/'+image_name+'.jpg') 
+        depth_raw = o3d.io.read_image(path+'/depth_gray/'+image_name+'.png') 
+        rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(rgb_raw, depth_raw)
 
-        # np_depth = np.array(depth)
-        # phc.set_intrinsics(np_depth.shape[1],np_depth.shape[0],3.8,3.8,np_depth.shape[1]/2,np_depth.shape[0]/2)
-        # pcloud = geometry.PointCloud()
-        # pcloud.create_from_depth_image(depth, phc)
+        pcd = o3d.geometry.PointCloud.create_from_rgbd_image(
+        rgbd_image,
+        o3d.camera.PinholeCameraIntrinsic(
+            o3d.camera.PinholeCameraIntrinsicParameters.PrimeSenseDefault))
+        # Flip it, otherwise the pointcloud will be upside down
+        pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
+        # o3d.visualization.draw_geometries([pcd], zoom=0.5)
 
 def resize_images(path):
     for image_name in sorted(os.listdir(path+'/rgb')):
@@ -66,7 +69,7 @@ def main():
         clean_names(data_path)
 
         print("Resizing Images...")
-        resize_images(data_path)
+        # resize_images(data_path)
 
         print("Calculating point clouds... ")    
         RGBD2pcloud(data_path)
