@@ -18,15 +18,23 @@ def RGBD2pcloud(path):
         image_name = image_name.replace(".png","")
         rgb_raw = o3d.io.read_image(path+'/rgb/'+image_name+'.jpg') 
         depth_raw = o3d.io.read_image(path+'/depth_gray/'+image_name+'.png') 
-        rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(rgb_raw, depth_raw)
+        rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(
+            rgb_raw, 
+            depth_raw,
+            depth_scale=0.035, # Gives max depth of around 30m  
+            depth_trunc=50.0,
+            convert_rgb_to_intensity=False)
+        
+        cam = o3d.camera.PinholeCameraIntrinsic()
+        # cam.set_intrinsics(648,488,600,600,324,244) #Bumblebee stereo params
+        cam.set_intrinsics(648,488,1000,1000,324,244) # Tuned for more realistic meshes
 
         pcd = o3d.geometry.PointCloud.create_from_rgbd_image(
-        rgbd_image,
-        o3d.camera.PinholeCameraIntrinsic(
-            o3d.camera.PinholeCameraIntrinsicParameters.PrimeSenseDefault))
+            rgbd_image,
+            cam)
         # Flip it, otherwise the pointcloud will be upside down
         pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
-        # o3d.visualization.draw_geometries([pcd], zoom=0.5)
+        o3d.visualization.draw_geometries_with_vertex_selection([pcd])
 
 def resize_images(path):
     for image_name in sorted(os.listdir(path+'/rgb')):
