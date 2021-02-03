@@ -20,7 +20,7 @@ The first step is to download the deep scene terrain dataset from the university
 ```
 ./data/download-data.sh
 ```
-This dataset is 1.7GB large and will take a few minutes to download.
+This dataset is 1.7GB and could take a while to download.
 
 ### Generate Simulation Data
 The depth images from the dataset must now be converted into a 3D DAE mesh file which can be used by the simulation:
