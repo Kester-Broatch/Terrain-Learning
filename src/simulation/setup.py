@@ -4,6 +4,7 @@
 # Sets up the simulations by generating collada (DAE) files from the dataset depth images. These collada files are used as terrain surfaces in the gazebo simultion.
 
 import os
+import sys
 import re
 import numpy as np
 from PIL import Image
@@ -13,7 +14,20 @@ import matplotlib.pyplot as plt
 project_path = os.path.dirname(os.path.realpath(__file__)).replace('/src/simulation','')
 data_paths = [project_path+"/data/test", project_path+"/data/train"] # Relative to this file
 
+def progress(count, total, status=''):
+    bar_len = 60
+    filled_len = int(round(bar_len * count / float(total)))
+
+    percents = round(100.0 * count / float(total), 1)
+    bar = '=' * filled_len + '-' * (bar_len - filled_len)
+
+    sys.stdout.write('[%s] %s%s ...%s\r' % (bar, percents, '%', status))
+    sys.stdout.flush()  
+
 def RGBD2pcloud(path):
+    total_files = len(os.listdir(path+'/rgb'))
+    count = 0
+
     if not os.path.exists(path+'/pcloud'): os.makedirs(path+'/pcloud')
 
     for image_name in sorted(os.listdir(path+'/depth_gray')):  
@@ -56,8 +70,13 @@ def RGBD2pcloud(path):
             pointcloud=pcd,
             write_ascii=True)
 
+        count += 1
+        progress(count, total_files)
+
 
 def resize_images(path):
+    total_files = 15*len(os.listdir(path+'/rgb')) #15 image directories to be resized
+    count = 0
     for image_name in sorted(os.listdir(path+'/rgb')):
         image_name = image_name.replace(".jpg","")
 
@@ -67,7 +86,7 @@ def resize_images(path):
         h = rgb.height
 
         # We resize all images to rgb size
-        print(image_name)
+        # print(image_name)
         dirnames = [dI for dI in os.listdir(path) if os.path.isdir(os.path.join(path,dI))]
         for dirname in dirnames:
             if dirname!='rgb':
@@ -75,13 +94,18 @@ def resize_images(path):
                     filename = path+'/'+dirname+'/'+image_name+'.tif'
                 elif dirname in ['ndvi_color','nrg']:
                     filename = path+'/'+dirname+'/'+image_name+'.jpg'
-                else:
+                elif dirname in ['depth_color','depth_color_1ch','depth_gray','evi_color','GT_color','nir','nir_color','nir_color_jet']:
                     filename = path+'/'+dirname+'/'+image_name+'.png'
+                else: continue # Continues if direcoty does not contain images
                 img = Image.open(filename)
                 img = img.resize((w,h))
                 img.save(filename)
+            count += 1
+            progress(count, total_files)
 
 def clean_names(path):
+    total_files = sum([len(files) for r, d, files in os.walk(path)])
+    count = 0
     for (dirpath, dirnames, filenames) in os.walk(path):
         for filename in filenames:
             if '_' in filename and filename!='.DS_Store': # Removes additional naming assigned to some of the data
@@ -89,19 +113,22 @@ def clean_names(path):
                 dot = filename.find(".")
                 new_filename = filename[0:underscore]+filename[dot:len(filename)]
                 os.rename(dirpath+"/"+filename, dirpath+"/"+new_filename)
-                # print(filename + "  ---->  " + new_filename)
+            count += 1
+            progress(count, total_files)
           
 def main():
     for data_path in data_paths:
-
+        print('\n\nProcessing data from '+data_path+'\n------------------------')
         print("Cleaning file names...")
         clean_names(data_path)
 
-        print("Resizing Images...")
-        # resize_images(data_path)
+        print("\nResizing Images...")
+        resize_images(data_path)
 
-        print("Calculating point clouds... ")    
+        print("\nCalculating point clouds... ")    
         RGBD2pcloud(data_path)
+
+        print("\nDone")
 
 
 if __name__ == "__main__":
