@@ -14,6 +14,8 @@ project_path = os.path.dirname(os.path.realpath(__file__)).replace('/src/simulat
 data_paths = [project_path+"/data/test", project_path+"/data/train"] # Relative to this file
 
 def RGBD2pcloud(path):
+    if not os.path.exists(path+'/pcloud'): os.makedirs(path+'/pcloud')
+
     for image_name in sorted(os.listdir(path+'/depth_gray')):  
         image_name = image_name.replace(".png","")
         rgb_raw = o3d.io.read_image(path+'/rgb/'+image_name+'.jpg') 
@@ -35,13 +37,25 @@ def RGBD2pcloud(path):
         # Flip it, otherwise the pointcloud will be upside down
         pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
 
-        # Rotate to make ground flat
-        pcd.rotate(pcd.get_rotation_matrix_from_xyz((0, np.pi / 4, 0)), 
+        # Rotate to make ground flat (accounts for downwards pointing cam)
+        pcd.rotate(pcd.get_rotation_matrix_from_xyz((-np.pi / 8, 0, 0)), 
             center=(0, 0, 0))      
 
-        origin = o3d.geometry.TriangleMesh.create_coordinate_frame(
-            size=0.6, origin=[0, 0, 0])
-        o3d.visualization.draw_geometries([pcd] + [origin])
+        # Visualise PCD
+        # X = Left (-ve) and Right (+ve) of image
+        # Y = Ground height below camera, Down is -ve, Up is +ve
+        # Z = Depth into image from camera, always -ve
+        # origin = o3d.geometry.TriangleMesh.create_coordinate_frame(
+        #     size=0.6, origin=[0, 0, 0])
+        # o3d.visualization.draw_geometries([pcd] + [origin])
+        # o3d.visualization.draw_geometries_with_vertex_selection([pcd])
+
+        # Save pcd
+        o3d.io.write_point_cloud(
+            filename=path+'/pcloud/'+image_name+'.pcd',
+            pointcloud=pcd,
+            write_ascii=True)
+
 
 def resize_images(path):
     for image_name in sorted(os.listdir(path+'/rgb')):
