@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 
 project_path = os.path.dirname(os.path.realpath(__file__)).replace('/src/simulation','')
 data_paths = [project_path+"/data/test", project_path+"/data/train"] # Relative to this file
+vis = True
 
 def progress(count, total, status=''):
     bar_len = 60
@@ -24,22 +25,47 @@ def progress(count, total, status=''):
     sys.stdout.write('[%s] %s%s ...%s\r' % (bar, percents, '%', status))
     sys.stdout.flush()  
 
+def pcloud2mesh(path):
+    total_files = len(os.listdir(path+'/rgb'))
+    count = 0
+
+    if not os.path.exists(path+'/mesh'): os.makedirs(path+'/mesh')
+
+    for image_name in sorted(os.listdir(path+'/rgb')):
+        image_name = image_name.replace(".jpg","")
+        pcd = o3d.io.read_point_cloud(path+'/pcloud/'+image_name+'.pcd')
+        pcd = pcd.voxel_down_sample(voxel_size=0.2)
+        pcd.estimate_normals(
+            search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.4, max_nn=30))
+        pcd.orient_normals_to_align_with_direction(np.array([0,1,1]))
+        mesh, densities = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
+            pcd, depth=9)
+        vertices_to_remove = densities < np.quantile(densities, 0.01)
+        mesh.remove_vertices_by_mask(vertices_to_remove)
+        if vis: o3d.visualization.draw_geometries([mesh])
+        o3d.io.write_triangle_mesh(path+'/mesh/'+image_name+'.obj', mesh,
+            compressed=True)
+
+        count += 1
+        progress(count, total_files)
+
+
 def RGBD2pcloud(path):
     total_files = len(os.listdir(path+'/rgb'))
     count = 0
 
     if not os.path.exists(path+'/pcloud'): os.makedirs(path+'/pcloud')
 
-    for image_name in sorted(os.listdir(path+'/depth_gray')):  
-        image_name = image_name.replace(".png","")
+    for image_name in sorted(os.listdir(path+'/rgb')):
+        image_name = image_name.replace(".jpg","")
         rgb_raw = o3d.io.read_image(path+'/rgb/'+image_name+'.jpg') 
-        depth_raw = o3d.io.read_image(path+'/depth_gray/'+image_name+'.png') 
+        depth_raw = o3d.io.read_image(path+'/depth_gray/'+image_name+'.png')
         rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(
             rgb_raw, 
             depth_raw,
             depth_scale=0.025, # Gives max depth of around 30m  
             depth_trunc=100.0,
-            convert_rgb_to_intensity=False)
+            convert_rgb_to_intensity=False) # Setting to false to save memory
         
         cam = o3d.camera.PinholeCameraIntrinsic()
         # cam.set_intrinsics(648,488,600,600,324,244) #Bumblebee stereo params
@@ -59,16 +85,16 @@ def RGBD2pcloud(path):
         # X = Left (-ve) and Right (+ve) of image
         # Y = Ground height below camera, Down is -ve, Up is +ve
         # Z = Depth into image from camera, always -ve
-        # origin = o3d.geometry.TriangleMesh.create_coordinate_frame(
-        #     size=0.6, origin=[0, 0, 0])
-        # o3d.visualization.draw_geometries([pcd] + [origin])
-        # o3d.visualization.draw_geometries_with_vertex_selection([pcd])
+        if vis:
+            origin = o3d.geometry.TriangleMesh.create_coordinate_frame(
+                size=0.6, origin=[0, 0, 0])
+            o3d.visualization.draw_geometries([pcd] + [origin])
 
         # Save pcd
         o3d.io.write_point_cloud(
             filename=path+'/pcloud/'+image_name+'.pcd',
             pointcloud=pcd,
-            write_ascii=True)
+            write_ascii=False)
 
         count += 1
         progress(count, total_files)
@@ -125,8 +151,11 @@ def main():
         print("\nResizing Images...")
         resize_images(data_path)
 
-        print("\nCalculating point clouds... ")    
+        print("\nGenerating point clouds... ")    
         RGBD2pcloud(data_path)
+
+        print("\nGenerating meshes... ")    
+        pcloud2mesh(data_path)
 
         print("\nDone")
 
