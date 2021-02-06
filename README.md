@@ -4,16 +4,22 @@ This repo contains the code I used in my MSc project to learn the vehicle dynami
 This repo is organised as follows:
 
 ```
-├── data
+├── data----------------Images and 3d files required to generate terrain simulations and train the model
 │   ├── test
 │   └── train
-├── models
+|
+├── models--------------Weights of trained tensorflow models
+|
 ├── src
-│   ├── processing
-│   ├── simulation
-│   └── training
-└── tests
+│   ├── simulation------Tools to generate and run terrain simulations with the gazebo physics engine
+│   ├── processing------Tools to generate training data from simulation results 
+│   └── training--------Scripts to train the model to predict terrain traversability  
+|
+└── tests---------------Model performance and code unit tests
 ```
+
+### Dependancies
+This project requires either linux or macos, with docker and docker-compose. In additionto this, it requires python3 with the open3d, tensorflow, numpy, PIL and matplotlib packages.
 
 ### Download Dataset 
 The first step is to download the deep scene terrain dataset from the university of freigburg using: 
@@ -23,7 +29,7 @@ The first step is to download the deep scene terrain dataset from the university
 This dataset is 1.7GB and could take a while to download.
 
 ### Generate Simulation Data
-The depth images from the dataset must now be converted into a 3D DAE mesh file which can be used by the simulation:
+The depth images from the dataset must now be converted into mesh files which can be used by the gazebo simulator:
 ```
 python3 src/simulation/setup.py
 ```
