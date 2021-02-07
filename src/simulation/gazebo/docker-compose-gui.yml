@@ -7,4 +7,17 @@ services:
         context: .
         dockerfile: Dockerfile
     image: kbroatch/terrain-learning:latest
-    # command: roslaunch safe_landing_planner avy_safelanding.launch
+    environment:
+    - "DISPLAY"
+    - "QT_X11_NO_MITSHM=1" #fix some QT bugs
+    #share your user to the container in order to access your x11
+    user: 1000:1000 #adapt as needed!
+    volumes: 
+      #share your x11 socket and permissions to the container
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /etc/group:/etc/group:ro
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/shadow:/etc/shadow:ro
+      - /etc/sudoers.d:/etc/sudoers.d:ro
+      - /home/$USER:/home/$USER:rw #share this project write permissions
+    command: gazebo
