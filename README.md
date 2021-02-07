@@ -34,3 +34,13 @@ The depth images from the dataset must now be converted into mesh files which ca
 python3 src/simulation/setup.py
 ```
 
+### Build and Run Simulation
+The simulation is built and run using docker containers, which are mounted the `data` directory. To start the simulation running in headless mode (no GUI) use:
+```
+./src/simulation/run.sh 
+```
+To mount the simulator onto you graphics socket and view the simulation through a gui use:
+```
+./src/simulation/run.sh -g
+```
+The simulator will save it's output in the data directory.
