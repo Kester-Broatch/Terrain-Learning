@@ -30,4 +30,4 @@ done
 
 
 
-docker-compose -f $COMPOSE up
+docker-compose -f $COMPOSE up --build
