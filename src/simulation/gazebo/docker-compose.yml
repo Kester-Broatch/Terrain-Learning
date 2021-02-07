@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  gazebo: 
+    container_name: terrain-sim
+    build:
+        context: .
+        dockerfile: Dockerfile
+    image: kbroatch/terrain-learning:latest
+    # command: roslaunch safe_landing_planner avy_safelanding.launch

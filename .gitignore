@@ -6,3 +6,5 @@ data/test/*
 
 data/train/*
 !data/train/README.md
+
+src/simulation/OLD/
