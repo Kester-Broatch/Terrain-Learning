@@ -2,11 +2,11 @@ version: '3.8'
 
 services:
   gazebo: 
-    container_name: terrain-sim
+    container_name: terrain-learning-container
     build:
         context: .
         dockerfile: Dockerfile
-    image: kbroatch/terrain-learning:latest
+    image: terrain-learning
     environment:
     - "DISPLAY"
     - "QT_X11_NO_MITSHM=1" #fix some QT bugs
