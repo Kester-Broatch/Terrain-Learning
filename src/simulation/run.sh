@@ -10,14 +10,14 @@ EOF
 }
 
 # Default docker-compose
-COMPOSE_DIR=$BASEDIR/gazebo/docker-compose.yml
+COMPOSE_DIR=$BASEDIR/docker/docker-compose.yml
 
 for i in "$@"
 do
     case $i in
         -g)
         echo "Running Gazebo container with GUI"
-        COMPOSE_DIR=$BASEDIR/gazebo/docker-compose-gui.yml
+        COMPOSE_DIR=$BASEDIR/docker/docker-compose-gui.yml
         ;;
         --help*)
         usage; exit 0;
