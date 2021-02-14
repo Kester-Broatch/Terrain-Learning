@@ -4,7 +4,7 @@ services:
   gazebo: 
     container_name: terrain-learning-container
     build:
-        context: .
-        dockerfile: Dockerfile
+        context: ..
+        dockerfile: docker/Dockerfile
     image: terrain-learning
-    command: gzserver
+    command: rospack list
