@@ -8,3 +8,7 @@ data/train/*
 !data/train/README.md
 
 src/simulation/OLD/
+src/simulation/catkin_ws/.catkin_workspace
+src/simulation/catkin_ws/build/
+src/simulation/catkin_ws/devel/
+src/simulation/catkin_ws/src/CMakeLists.txt
