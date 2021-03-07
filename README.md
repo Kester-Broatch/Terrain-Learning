@@ -19,7 +19,8 @@ This repo is organised as follows:
 ```
 
 ### Dependancies
-This project requires either linux or macos, with docker and docker-compose. In additionto this, it requires python3 with the open3d, tensorflow, numpy, PIL and matplotlib packages.
+* ROS melodic (ubuntu 18.04) 
+* Python3 with the open3d, tensorflow, numpy, PIL and matplotlib packages.
 
 ### Download Dataset 
 The first step is to download the deep scene terrain dataset from the university of freigburg using: 
@@ -34,4 +35,27 @@ The depth images from the dataset must now be converted into mesh files which ca
 python3 src/simulation/setup.py
 ```
 
-### Build and Run Simulation
+### Build simulation ROS package
+1. Setup your ROS installation (if not already done), eg for melodic:
+
+```
+source /opt/ros/melodic/setup.bash
+```
+
+1. Build the simulation packages inside the catkin workspace:
+
+```
+catkin_make --directory src/simulation/catkin_ws/
+```
+
+1. Source the catkin workspace to ensure that the packages can be located by ROS (this step should be done in every new terminal in which you want to use the packages, or added to bashrc if you want it to be permanent):
+
+```
+source src/simulation/catkin_ws/devel/setup.bash
+```
+
+The simulation packages should now be compiled and added to your ros package path. You can confirm that they are there using:
+
+```
+rospack list | grep simulate_traversability
+```
