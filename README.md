@@ -38,21 +38,21 @@ python3 src/simulation/setup.py
 ### Build simulation ROS package
 1. Setup your ROS installation (if not already done), eg for melodic:
 
-```
-source /opt/ros/melodic/setup.bash
-```
+    ```
+    source /opt/ros/melodic/setup.bash
+    ```
 
 1. Build the simulation packages inside the catkin workspace:
 
-```
-catkin_make --directory src/simulation/catkin_ws/
-```
+    ```
+    catkin_make --directory src/simulation/catkin_ws/
+    ```
 
 1. Source the catkin workspace to ensure that the packages can be located by ROS (this step should be done in every new terminal in which you want to use the packages, or added to bashrc if you want it to be permanent):
 
-```
-source src/simulation/catkin_ws/devel/setup.bash
-```
+    ```
+    source src/simulation/catkin_ws/devel/setup.bash
+    ```
 
 The simulation packages should now be compiled and added to your ros package path. You can confirm that they are there using:
 
